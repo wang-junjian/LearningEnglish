@@ -53,12 +53,10 @@ if __name__ == '__main__':
         english_label['text'] = english
         chinese_label['text'] = chinese
 
-        window.update_idletasks()  # 更新界面
+        window.update  # 更新界面
         say_n_times(english, n=2)
 
         current_word_index += 1
-
-        window.after(500, next_word)
 
 
     def on_key_press(event):
