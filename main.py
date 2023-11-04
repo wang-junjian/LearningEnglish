@@ -4,6 +4,15 @@ import tkinter as tk
 import random
 # import playsound
 
+from enum import Enum
+
+class Model(Enum):
+    SEQUENCE = 1
+    RANDOM = 2
+
+model = Model.SEQUENCE
+
+
 unit1 = [('textbook', 'n. 教科书；课本'), ('conversation', 'n. 交谈；谈话'), ('aloud', 'adv. 大声地；出声地'), ('pronunciation', 'n. 发音；读音'), ('sentence', 'n. 句子'), ('patient', 'adj. 有耐心的 n. 病人'), ('expression', 'n. 表达（方式）；表示'), ('discover', 'v. 发现；发觉'), ('secret', 'n. 秘密；adj. 秘密的；'), ('fall in love with', '爱上；与⋯⋯相爱'), ('grammar', 'n. 语法'), ('repeat', 'v. 重复；重做'), ('note', 'n. 笔记；记录 v. 注意；指出'), ('pal', 'n. 朋友；伙伴'), ('pattern', 'n. 模式；方式'), ('physics', 'n. 物理；物理学'), ('chemistry', 'n. 化学'), ('partner', 'n. 搭档；同伴'), ('pronounce', 'v. 发音'), ('increase', 'v. 增加；增长'), ('speed', 'n. 速度 v.加速'), ('ability', 'n. 能力；才能'), ('brain', 'n. 大脑'), ('active', 'adj. 活跃的；积极的'), ('attention', 'n. 注意；关注'), ('pay attention to', '注意；关注'), ('connect', 'v. （使）连接；与⋯⋯有联系'), ('connect … with', '把⋯⋯和⋯⋯连接或联系起来'), ('overnight', 'adv. 一夜之间；在夜间'), ('review', 'v. & n. 回顾；复习'), ('knowledge', 'n.知识；学问'), ('wisely', 'adv. 明智地；聪明地'), ('Annie', '安妮（女名）'), ('Alexander Graham Bell', '格雷厄姆 • 贝尔')]
 unit2 = [('lantern', 'n. 灯笼'), ('stranger', 'n. 陌生人'), ('relative', 'n. 亲属；亲戚'), ('put on', '增加（体重）；发胖'), ('pound', 'n. 磅（重量单位）；英镑'), ('folk', 'adj. 民间的；民俗的'), ('goddess', 'n. 女神'), ('steal', 'v. (stole ; stolen) 偷；窃取'), ('lay', 'v. (laid; laid) 放置；安放；产（卵）；下（蛋）'), ('lay out', '摆开；布置'), ('dessert', 'n. （饭后）甜点；甜食'), ('garden', 'n. 花园；园子'), ('admire', 'v. 欣赏；仰慕'), ('tie', 'n. 领带 v. 捆；束'), ('haunted', 'a. 有鬼魂出没的；闹鬼的'), ('ghost', 'n. 鬼；鬼魂'), ('trick', 'n. 花招；把戏'), ('treat', 'n. 款待；招待v. 招待；请客'), ('spider', 'n. 蜘蛛'), ('Christmas', 'n. 圣诞节'), ('fool', 'n. 蠢人；傻瓜 v. 愚弄adj. 愚蠢的'), ('lie', 'v. (lay ;lain) 平躺；处于'), ('novel', 'n. （长篇）小说'), ('eve', 'n. （尤指宗教节假日的）前夕；前夜'), ('bookstore', 'n. 书店'), ('dead', 'adj. 死的；失去生命的'), ('business', 'n. 生意；商业'), ('punish', 'v. 处罚；惩罚'), ('warn', 'v. 警告；告诫'), ('present', 'n. 现在；礼物adj. 现在的'), ('nobody', 'pron. 没有人'), ('warmth', 'n. 温暖；暖和'), ('spread', 'v. 传播；展开 n. 蔓延；传播'), ('Macao', '澳门'), ('Chiang Mai', '清迈（泰城市）'), ('Halloween', '万圣节前夕'), ('St. Valentine’s Day', '情人节'), ('Clara', '克拉拉（女名）'), ('Santa Claus', '圣诞老人'), ('Charles Dickens', '查尔斯 • 狄更斯（英）'), ('Scrooge', '斯克鲁奇 n.（非正式）吝啬鬼'), ('Jacob Marley', '雅各布 • 马利')]
 unit3 = [('restroom', 'n. （美）洗手间；公共厕所'), ('stamp', 'n. 邮票；印章'), ('postcard', 'n. 明信片'), ('pardon', 'interj. 请再说一遍；'), ('washroom', 'n. 洗手间；厕所'), ('bathroom', 'n. 浴室；洗手间'), ('quick', 'adj. 快的；迅速的'), ('rush', 'v.& n. 仓促；急促'), ('suggest', 'v. 建议；提议'), ('staff', 'n. 管理人员；职工'), ('grape', 'n. 葡萄'), ('central', 'adj. 中心的；中央的'), ('mail', 'v. 邮寄；发电子邮件n. 邮件'), ('east', 'adj. 东方的adv. 向东；n.东方'), ('fascinating', 'a. 迷人的；有吸引力的'), ('convenient', 'a. 便利的；方便的'), ('mall', 'n. 商场；购物中心'), ('clerk', 'n. 职员'), ('corner', 'n. 拐角；角落'), ('polite', 'adj. 有礼貌的；客气的'), ('politely', 'adv. 礼貌地；客气地'), ('speaker', 'n. 讲（某种语言）的人；发言者'), ('request', 'n. 要求；请求'), ('choice', 'n. 选择；挑选'), ('direction', 'n. 方向；方位'), ('correct', 'adj. 正确的；恰当的'), ('direct', 'adj. 直接的；直率的'), ('whom', 'pron. 谁；什么人'), ('address', 'n. 地址；通讯处'), ('faithfully', 'adv. 忠实地；忠诚地'), ('Italian', 'a. 意大利\\人的；n. 意大利人\\语'), ('Kevin', '凯文（男名）'), ('Tim', '蒂姆（男名）')]
@@ -27,46 +36,114 @@ def say_n_times(text, voice=None, n=1, interval=0.5):
         say(text)
         time.sleep(interval)
 
+def show_help():
+    help_window = tk.Toplevel(window)
+    help_window.title("帮助")
+
+    help_text = """
+    快捷键：
+    - 显示/隐藏中文：u
+    - 上一个单词：左箭头，a，空格
+    - 下一个单词：右箭头，d
+    - 英文发音：p
+    - 随机播放：r
+    - 顺序播放：s（默认）
+    - 显示帮助：h
+    - 退出：q
+    """
+    help_label = tk.Label(help_window, text=help_text, anchor='w', justify='left')
+    help_label.pack()
+
 
 if __name__ == '__main__':
     window = tk.Tk()
-    window.title("单词卡片")
+    window.title("学习英语")
 
     # 设置窗口大小
     window.geometry("1200x800")
     # window.state('zoomed')
 
     # 创建一个标签，用于显示单词
-    english_label = tk.Label(window, text="", font=("Arial", 100))
-    english_label.pack(pady=200)
-    chinese_label = tk.Label(window, text="", font=("Arial", 100))
-    chinese_label.pack(pady=100)
+    english_label = tk.Label(window, text="")
+    chinese_label = tk.Label(window, text="")
 
-    current_word_index = 0
+    # 将 english_label 放置在第 0 行
+    english_label.grid(row=0, sticky='nsew')
+    # 将 chinese_label 放置在第 1 行
+    chinese_label.grid(row=1, sticky='nsew')
 
-    def next_word():
+    # 设置第 0 行和第 1 行的权重为 1，这样它们会平均分配窗口的空间
+    window.grid_rowconfigure(0, weight=1)
+    window.grid_rowconfigure(1, weight=1)
+
+    # 设置第 0 列的权重为 1，这样 english_label 和 chinese_label 会占满窗口的宽度
+    window.grid_columnconfigure(0, weight=1)    
+
+    is_show_chinese = True
+    current_word_index = -1
+
+    def next_word(step=1):
         global current_word_index
+
+        if model == Model.SEQUENCE:
+            current_word_index += step
+        else:
+            current_word_index = random.randint(0, len(words) - 1)
+
         if current_word_index >= len(words):
             current_word_index = 0
+        elif current_word_index < 0:
+            current_word_index = len(words) - 1
 
         english, chinese = words[current_word_index]
         english_label['text'] = english
-        chinese_label['text'] = chinese
+        if is_show_chinese:
+            chinese_label['text'] = chinese
 
-        window.update  # 更新界面
-        say_n_times(english, n=2)
+        window.update()  # 更新界面
 
-        current_word_index += 1
-
+    def show_chinese():
+        global is_show_chinese
+        is_show_chinese = not is_show_chinese
+        if is_show_chinese:
+            chinese_label.grid(row=1, sticky='nsew')
+        else:
+            chinese_label.grid_remove()
 
     def on_key_press(event):
-        if event.char == 'q':
+        global model
+        if event.char == 'h':
+            show_help()
+        elif event.char == 'q':
             window.destroy()
-        elif event.keysym == 'space':
+        elif event.char == 'z':
+            window.state('zoomed')
+        elif event.char == 'u':
+            show_chinese()
+        elif event.char == 'p':
+            say(english_label['text'])
+        elif event.char == 's':
+            model = Model.SEQUENCE
+        elif event.char == 'r':
+            model = Model.RANDOM
+        elif event.keysym == 'Right' or event.keysym == 'space' or event.char == 'd':
             next_word()
-            
-    window.bind('q', on_key_press)
-    window.bind('<space>', on_key_press)
+        elif event.keysym == 'Left' or event.char == 'a':
+            next_word(-1)
+    
+    keys = [
+        'h', # 帮助
+        'q', # 退出
+        'z', # 窗口放大
+        'u', # 显示/隐藏中文
+        'p', # 播放英文
+        's', # 顺序播放（默认）
+        'r', # 随机播放
+        'a', '<Left>',              # 上一个单词
+        'd', '<space>', '<Right>'   # 下一个单词
+    ]
+    for key in keys:
+        window.bind(key, on_key_press)
 
     def on_resize(event):
         """
