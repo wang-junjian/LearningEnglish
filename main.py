@@ -6,9 +6,15 @@ import random
 
 from enum import Enum
 
-class Model(Enum):
-    SEQUENCE = 1
-    RANDOM = 2
+class LearningMode(Enum):
+    Sequence = 1
+    Random = 2
+
+class PlayMode(Enum):
+    Manual = 1
+    Auto = 2
+    EnglishChinese = 3
+    ChineseEnglish = 4
 
 
 unit1 = [('textbook', 'n. 教科书；课本'), ('conversation', 'n. 交谈；谈话'), ('aloud', 'adv. 大声地；出声地'), ('pronunciation', 'n. 发音；读音'), ('sentence', 'n. 句子'), ('patient', 'adj. 有耐心的 n. 病人'), ('expression', 'n. 表达（方式）；表示'), ('discover', 'v. 发现；发觉'), ('secret', 'n. 秘密；adj. 秘密的；'), ('fall in love with', '爱上；与⋯⋯相爱'), ('grammar', 'n. 语法'), ('repeat', 'v. 重复；重做'), ('note', 'n. 笔记；记录 v. 注意；指出'), ('pal', 'n. 朋友；伙伴'), ('pattern', 'n. 模式；方式'), ('physics', 'n. 物理；物理学'), ('chemistry', 'n. 化学'), ('partner', 'n. 搭档；同伴'), ('pronounce', 'v. 发音'), ('increase', 'v. 增加；增长'), ('speed', 'n. 速度 v.加速'), ('ability', 'n. 能力；才能'), ('brain', 'n. 大脑'), ('active', 'adj. 活跃的；积极的'), ('attention', 'n. 注意；关注'), ('pay attention to', '注意；关注'), ('connect', 'v. （使）连接；与⋯⋯有联系'), ('connect … with', '把⋯⋯和⋯⋯连接或联系起来'), ('overnight', 'adv. 一夜之间；在夜间'), ('review', 'v. & n. 回顾；复习'), ('knowledge', 'n.知识；学问'), ('wisely', 'adv. 明智地；聪明地'), ('Annie', '安妮（女名）'), ('Alexander Graham Bell', '格雷厄姆 • 贝尔')]
@@ -43,7 +49,8 @@ class LearingEnglish():
     SPLIT_SYMBOL = '\n\n'
 
     def __init__(self, words, title='学习英语'):
-        self.learn_model = Model.SEQUENCE
+        self.play_mode = PlayMode.Auto
+        self.learning_mode = LearningMode.Sequence
         self.words = words
         self.current_word_index = -1
         self.is_show_chinese = True
@@ -90,9 +97,9 @@ class LearingEnglish():
         help_label.pack()
 
     def next_word(self, step=1):
-        if self.learn_model == Model.SEQUENCE:
+        if self.learning_mode == LearningMode.Sequence:
             self.current_word_index += step
-        else:
+        elif self.learning_mode == LearningMode.Random:
             self.current_word_index = random.randint(0, len(self.words) - 1)
 
         if self.current_word_index >= len(self.words):
@@ -103,11 +110,30 @@ class LearingEnglish():
         self.show_current_word()
 
     def show_current_word(self):
-        english, chinese = self.words[self.current_word_index]
-        word_text = english
-        if self.is_show_chinese:
+        if self.play_mode == PlayMode.Manual:
+            english, chinese = self.words[self.current_word_index]
+            word_text = english
+            if self.is_show_chinese:
+                word_text = f"{english}{self.SPLIT_SYMBOL}{chinese}"
+            self.word_label['text'] = word_text
+        elif self.play_mode == PlayMode.Auto:
+            english, chinese = self.words[self.current_word_index]
             word_text = f"{english}{self.SPLIT_SYMBOL}{chinese}"
-        self.word_label['text'] = word_text
+            self.word_label['text'] = word_text
+
+            """
+            在 Python 中，lambda 函数只能包含一个表达式，不能包含多条语句。但是，你可以通过将多个操作组合成一个表达式来绕过这个限制。
+            以下是如何在 lambda 函数中同时调用 say 方法和生成一个空格键事件的代码：
+            self.window.after(500, lambda: (self.say(), self.window.event_generate('<space>'))[1])
+            在这个例子中，(self.say(), self.window.event_generate('<space>')) 是一个元组，
+            它包含两个元素：self.say() 的返回值和 self.window.event_generate('<space>') 的返回值。
+            [1] 选择了这个元组的第二个元素，也就是 self.window.event_generate('<space>') 的返回值。
+            这样，lambda 函数就会先调用 self.say()，然后生成一个空格键事件，最后返回 self.window.event_generate('<space>') 的返回值。
+            请注意，这种方法只适用于你不关心 self.say() 的返回值的情况。如果你需要 self.say() 的返回值，你应该使用一个正常的函数，而不是 lambda 函数。
+            """
+            self.window.after(10, lambda: (self.say(), self.window.event_generate('<space>'))[1])
+        
+        self.window.update()
 
     def show_chinese(self):
         self.is_show_chinese = not self.is_show_chinese
@@ -136,8 +162,8 @@ class LearingEnglish():
             'z': lambda: self.window.state('zoomed'),
             'u': self.show_chinese,
             'p': self.say,
-            's': lambda: setattr(self, 'learn_model', Model.SEQUENCE),
-            'r': lambda: setattr(self, 'learn_model', Model.RANDOM),
+            's': lambda: setattr(self, 'learning_mode', LearningMode.Sequence),
+            'r': lambda: setattr(self, 'learning_mode', LearningMode.Random),
             'd': lambda: self.next_word(),
             '<Right>': lambda: self.next_word(),
             '<space>': lambda: self.next_word(),
