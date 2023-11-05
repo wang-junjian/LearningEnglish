@@ -52,6 +52,10 @@ steel
 
 n. 钢；钢铁
 
+environmental
+
+adj. 自然环境的；有关环境的
+
 grass
 
 [gras]
@@ -132,6 +136,18 @@ mobile
 
 a. 可移的；非固定的
 
+everyday
+
+[evridei]
+
+adj. 每天的；日常的
+
+boss
+
+[bɔs]
+
+n. 老板；上司
+
 Germany
 
 [dʒə:(r)məni]
@@ -143,6 +159,12 @@ surface
 [sə:(r)fis]
 
 n. 表面；表层
+
+traffic
+
+[træfik]
+
+n. 交通；路上行驶的车辆
 
 postman
 

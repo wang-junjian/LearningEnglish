@@ -74,6 +74,12 @@ by accident
 
 偶然；意外地
 
+ruler
+
+[ru:lə]
+
+n. 尺子；统治者；支配者
+
 nearly
 
 [niəli]
@@ -97,6 +103,18 @@ saint
 [seint]
 
 n. 圣人；圣徒
+
+national
+
+[næʃənəl]
+
+adj. 国家的；民族的
+
+trade
+
+[treid]
+
+n. 贸易；交易；v. 做买卖；从事贸易
 
 take place
 
@@ -129,6 +147,12 @@ lock
 [lɔk; la:k]
 
 v. 锁上；锁住
+
+ring
+
+[riŋ]
+
+v. （使）发出钟声或铃声；打电话
 
 earthquake
 

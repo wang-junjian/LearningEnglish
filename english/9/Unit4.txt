@@ -44,9 +44,15 @@ Asian
 
 a. 亚洲的；n. 亚洲人
 
+deal
+
+[di:l]
+
+对付 ; 对待
+
 deal with
 
-对付 ; 应付
+应对 ; 处理
 
 dare
 
@@ -76,7 +82,7 @@ European
 
 [ju(ə)rəpi:ən]
 
-a. 欧洲\人的
+adj. 欧洲（人）的 n. 欧洲人
 
 British
 
@@ -89,6 +95,16 @@ speech
 [spi:tʃ]
 
 n.讲话；发言
+
+public
+
+[pʌblik]
+
+n. 民众；adj. 公开的；公众的
+
+in public
+
+公开地；在别人（尤指生人）面前
 
 ant
 
