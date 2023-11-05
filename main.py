@@ -10,7 +10,8 @@ class Model(Enum):
     SEQUENCE = 1
     RANDOM = 2
 
-model = Model.SEQUENCE
+LEARN_MODEL = Model.SEQUENCE
+SPLIT_SYMBOL = '\n\n'
 
 
 unit1 = [('textbook', 'n. 教科书；课本'), ('conversation', 'n. 交谈；谈话'), ('aloud', 'adv. 大声地；出声地'), ('pronunciation', 'n. 发音；读音'), ('sentence', 'n. 句子'), ('patient', 'adj. 有耐心的 n. 病人'), ('expression', 'n. 表达（方式）；表示'), ('discover', 'v. 发现；发觉'), ('secret', 'n. 秘密；adj. 秘密的；'), ('fall in love with', '爱上；与⋯⋯相爱'), ('grammar', 'n. 语法'), ('repeat', 'v. 重复；重做'), ('note', 'n. 笔记；记录 v. 注意；指出'), ('pal', 'n. 朋友；伙伴'), ('pattern', 'n. 模式；方式'), ('physics', 'n. 物理；物理学'), ('chemistry', 'n. 化学'), ('partner', 'n. 搭档；同伴'), ('pronounce', 'v. 发音'), ('increase', 'v. 增加；增长'), ('speed', 'n. 速度 v.加速'), ('ability', 'n. 能力；才能'), ('brain', 'n. 大脑'), ('active', 'adj. 活跃的；积极的'), ('attention', 'n. 注意；关注'), ('pay attention to', '注意；关注'), ('connect', 'v. （使）连接；与⋯⋯有联系'), ('connect … with', '把⋯⋯和⋯⋯连接或联系起来'), ('overnight', 'adv. 一夜之间；在夜间'), ('review', 'v. & n. 回顾；复习'), ('knowledge', 'n.知识；学问'), ('wisely', 'adv. 明智地；聪明地'), ('Annie', '安妮（女名）'), ('Alexander Graham Bell', '格雷厄姆 • 贝尔')]
@@ -64,19 +65,14 @@ if __name__ == '__main__':
     # window.state('zoomed')
 
     # 创建一个标签，用于显示单词
-    english_label = tk.Label(window, text="")
-    chinese_label = tk.Label(window, text="")
+    word_label = tk.Label(window, text="")
 
+    # 控件布局
     # 将 english_label 放置在第 0 行
-    english_label.grid(row=0, sticky='nsew')
-    # 将 chinese_label 放置在第 1 行
-    chinese_label.grid(row=1, sticky='nsew')
-
-    # 设置第 0 行和第 1 行的权重为 1，这样它们会平均分配窗口的空间
+    word_label.grid(row=0, sticky='nsew')
+    # 设置第 0 行权重为 1，这样它会分配整个窗口的空间
     window.grid_rowconfigure(0, weight=1)
-    window.grid_rowconfigure(1, weight=1)
-
-    # 设置第 0 列的权重为 1，这样 english_label 和 chinese_label 会占满窗口的宽度
+    # 设置第 0 列的权重为 1，这样 label 会占满窗口的宽度
     window.grid_columnconfigure(0, weight=1)    
 
     is_show_chinese = True
@@ -85,7 +81,7 @@ if __name__ == '__main__':
     def next_word(step=1):
         global current_word_index
 
-        if model == Model.SEQUENCE:
+        if LEARN_MODEL == Model.SEQUENCE:
             current_word_index += step
         else:
             current_word_index = random.randint(0, len(words) - 1)
@@ -95,23 +91,23 @@ if __name__ == '__main__':
         elif current_word_index < 0:
             current_word_index = len(words) - 1
 
-        english, chinese = words[current_word_index]
-        english_label['text'] = english
-        if is_show_chinese:
-            chinese_label['text'] = chinese
-
+        show_current_word()
         window.update()  # 更新界面
+
+    def show_current_word():
+        english, chinese = words[current_word_index]
+        word_text = english
+        if is_show_chinese:
+            word_text = f"{english}{SPLIT_SYMBOL}{chinese}"
+        word_label['text'] = word_text
 
     def show_chinese():
         global is_show_chinese
         is_show_chinese = not is_show_chinese
-        if is_show_chinese:
-            chinese_label.grid(row=1, sticky='nsew')
-        else:
-            chinese_label.grid_remove()
+        show_current_word()
 
     def on_key_press(event):
-        global model
+        global LEARN_MODEL
         if event.char == 'h':
             show_help()
         elif event.char == 'q':
@@ -121,11 +117,11 @@ if __name__ == '__main__':
         elif event.char == 'u':
             show_chinese()
         elif event.char == 'p':
-            say(english_label['text'])
+            say(word_label['text'].split(SPLIT_SYMBOL)[0])
         elif event.char == 's':
-            model = Model.SEQUENCE
+            LEARN_MODEL = Model.SEQUENCE
         elif event.char == 'r':
-            model = Model.RANDOM
+            LEARN_MODEL = Model.RANDOM
         elif event.keysym == 'Right' or event.keysym == 'space' or event.char == 'd':
             next_word()
         elif event.keysym == 'Left' or event.char == 'a':
@@ -155,8 +151,7 @@ if __name__ == '__main__':
             # 计算新的字体大小
             new_font_size = int(event.height / 10)
             # 更新标签的字体大小
-            english_label.config(font=("Arial", new_font_size))
-            chinese_label.config(font=("Arial", new_font_size))
+            word_label.config(font=("Arial", new_font_size))
 
     window.bind('<Configure>', on_resize)
 
