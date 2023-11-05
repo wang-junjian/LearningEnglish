@@ -10,9 +10,6 @@ class Model(Enum):
     SEQUENCE = 1
     RANDOM = 2
 
-LEARN_MODEL = Model.SEQUENCE
-SPLIT_SYMBOL = '\n\n'
-
 
 unit1 = [('textbook', 'n. 教科书；课本'), ('conversation', 'n. 交谈；谈话'), ('aloud', 'adv. 大声地；出声地'), ('pronunciation', 'n. 发音；读音'), ('sentence', 'n. 句子'), ('patient', 'adj. 有耐心的 n. 病人'), ('expression', 'n. 表达（方式）；表示'), ('discover', 'v. 发现；发觉'), ('secret', 'n. 秘密；adj. 秘密的；'), ('fall in love with', '爱上；与⋯⋯相爱'), ('grammar', 'n. 语法'), ('repeat', 'v. 重复；重做'), ('note', 'n. 笔记；记录 v. 注意；指出'), ('pal', 'n. 朋友；伙伴'), ('pattern', 'n. 模式；方式'), ('physics', 'n. 物理；物理学'), ('chemistry', 'n. 化学'), ('partner', 'n. 搭档；同伴'), ('pronounce', 'v. 发音'), ('increase', 'v. 增加；增长'), ('speed', 'n. 速度 v.加速'), ('ability', 'n. 能力；才能'), ('brain', 'n. 大脑'), ('active', 'adj. 活跃的；积极的'), ('attention', 'n. 注意；关注'), ('pay attention to', '注意；关注'), ('connect', 'v. （使）连接；与⋯⋯有联系'), ('connect … with', '把⋯⋯和⋯⋯连接或联系起来'), ('overnight', 'adv. 一夜之间；在夜间'), ('review', 'v. & n. 回顾；复习'), ('knowledge', 'n.知识；学问'), ('wisely', 'adv. 明智地；聪明地'), ('Annie', '安妮（女名）'), ('Alexander Graham Bell', '格雷厄姆 • 贝尔')]
 unit2 = [('lantern', 'n. 灯笼'), ('stranger', 'n. 陌生人'), ('relative', 'n. 亲属；亲戚'), ('put on', '增加（体重）；发胖'), ('pound', 'n. 磅（重量单位）；英镑'), ('folk', 'adj. 民间的；民俗的'), ('goddess', 'n. 女神'), ('steal', 'v. (stole ; stolen) 偷；窃取'), ('lay', 'v. (laid; laid) 放置；安放；产（卵）；下（蛋）'), ('lay out', '摆开；布置'), ('dessert', 'n. （饭后）甜点；甜食'), ('garden', 'n. 花园；园子'), ('admire', 'v. 欣赏；仰慕'), ('tie', 'n. 领带 v. 捆；束'), ('haunted', 'a. 有鬼魂出没的；闹鬼的'), ('ghost', 'n. 鬼；鬼魂'), ('trick', 'n. 花招；把戏'), ('treat', 'n. 款待；招待v. 招待；请客'), ('spider', 'n. 蜘蛛'), ('Christmas', 'n. 圣诞节'), ('fool', 'n. 蠢人；傻瓜 v. 愚弄adj. 愚蠢的'), ('lie', 'v. (lay ;lain) 平躺；处于'), ('novel', 'n. （长篇）小说'), ('eve', 'n. （尤指宗教节假日的）前夕；前夜'), ('bookstore', 'n. 书店'), ('dead', 'adj. 死的；失去生命的'), ('business', 'n. 生意；商业'), ('punish', 'v. 处罚；惩罚'), ('warn', 'v. 警告；告诫'), ('present', 'n. 现在；礼物adj. 现在的'), ('nobody', 'pron. 没有人'), ('warmth', 'n. 温暖；暖和'), ('spread', 'v. 传播；展开 n. 蔓延；传播'), ('Macao', '澳门'), ('Chiang Mai', '清迈（泰城市）'), ('Halloween', '万圣节前夕'), ('St. Valentine’s Day', '情人节'), ('Clara', '克拉拉（女名）'), ('Santa Claus', '圣诞老人'), ('Charles Dickens', '查尔斯 • 狄更斯（英）'), ('Scrooge', '斯克鲁奇 n.（非正式）吝啬鬼'), ('Jacob Marley', '雅各布 • 马利')]
@@ -24,139 +21,147 @@ unit6 = [('heel', 'n. 鞋跟；足跟'), ('electricity', 'n. 电；电能'), ('s
 words = unit1 + unit2 + unit3 + unit4 + unit5 + unit6
 
 
-def say(text, voice=None):
-    voice_param = f'-v {voice}' if voice else ''
-    say_command = f'say {voice_param} {text}'
-    os.system(say_command)
+class Speech():
+    @staticmethod
+    def say(text, voice=None):
+        voice_param = f'-v {voice}' if voice else ''
+        say_command = f'say {voice_param} {text}'
+        os.system(say_command)
 
-def say_zh(text, voice='Tingting'):
-    say(text, voice=voice)
+    @staticmethod
+    def say_zh(text, voice='Tingting'):
+        Speech.say(text, voice=voice)
 
-def say_n_times(text, voice=None, n=1, interval=0.5):
-    for i in range(n):
-        say(text)
-        time.sleep(interval)
-
-def show_help():
-    help_window = tk.Toplevel(window)
-    help_window.title("帮助")
-
-    help_text = """
-    快捷键：
-    - 显示/隐藏中文：u
-    - 上一个单词：左箭头，a，空格
-    - 下一个单词：右箭头，d
-    - 英文发音：p
-    - 随机播放：r
-    - 顺序播放：s（默认）
-    - 显示帮助：h
-    - 退出：q
-    """
-    help_label = tk.Label(help_window, text=help_text, anchor='w', justify='left')
-    help_label.pack()
+    @staticmethod
+    def say_n_times(text, voice=None, n=1, interval=0.5):
+        for i in range(n):
+            Speech.say(text)
+            time.sleep(interval)
 
 
-if __name__ == '__main__':
-    window = tk.Tk()
-    window.title("学习英语")
+class LearingEnglish():
+    SPLIT_SYMBOL = '\n\n'
 
-    # 设置窗口大小
-    window.geometry("1200x800")
-    # window.state('zoomed')
+    def __init__(self, words, title='学习英语'):
+        self.learn_model = Model.SEQUENCE
+        self.words = words
+        self.current_word_index = -1
+        self.is_show_chinese = True
+        self.window = self.create_window(title)
+        self.bind_event()
 
-    # 创建一个标签，用于显示单词
-    word_label = tk.Label(window, text="")
+    def create_window(self, title):
+        window = tk.Tk()
+        window.title(title)
 
-    # 控件布局
-    # 将 english_label 放置在第 0 行
-    word_label.grid(row=0, sticky='nsew')
-    # 设置第 0 行权重为 1，这样它会分配整个窗口的空间
-    window.grid_rowconfigure(0, weight=1)
-    # 设置第 0 列的权重为 1，这样 label 会占满窗口的宽度
-    window.grid_columnconfigure(0, weight=1)    
+        # 设置窗口大小
+        window.geometry("1200x800")
+        # window.state('zoomed')
 
-    is_show_chinese = True
-    current_word_index = -1
+        # 创建一个标签，用于显示单词
+        self.word_label = tk.Label(window, text="")
 
-    def next_word(step=1):
-        global current_word_index
+        # 控件布局
+        # 将 english_label 放置在第 0 行
+        self.word_label.grid(row=0, sticky='nsew')
+        # 设置第 0 行权重为 1，这样它会分配整个窗口的空间
+        window.grid_rowconfigure(0, weight=1)
+        # 设置第 0 列的权重为 1，这样 label 会占满窗口的宽度
+        window.grid_columnconfigure(0, weight=1)    
+        
+        return window
 
-        if LEARN_MODEL == Model.SEQUENCE:
-            current_word_index += step
+    def show_help(self):
+        help_window = tk.Toplevel(self.window)
+        help_window.title("帮助")
+
+        help_text = """
+        快捷键：
+        - 显示/隐藏中文：u
+        - 上一个单词：左箭头，a，空格
+        - 下一个单词：右箭头，d
+        - 英文发音：p
+        - 随机播放：r
+        - 顺序播放：s（默认）
+        - 显示帮助：h
+        - 退出：q
+        """
+        help_label = tk.Label(help_window, text=help_text, anchor='w', justify='left')
+        help_label.pack()
+
+    def next_word(self, step=1):
+        if self.learn_model == Model.SEQUENCE:
+            self.current_word_index += step
         else:
-            current_word_index = random.randint(0, len(words) - 1)
+            self.current_word_index = random.randint(0, len(self.words) - 1)
 
-        if current_word_index >= len(words):
-            current_word_index = 0
-        elif current_word_index < 0:
-            current_word_index = len(words) - 1
+        if self.current_word_index >= len(self.words):
+            self.current_word_index = 0
+        elif self.current_word_index < 0:
+            self.current_word_index = len(self.words) - 1
 
-        show_current_word()
-        window.update()  # 更新界面
+        self.show_current_word()
 
-    def show_current_word():
-        english, chinese = words[current_word_index]
+    def show_current_word(self):
+        english, chinese = self.words[self.current_word_index]
         word_text = english
-        if is_show_chinese:
-            word_text = f"{english}{SPLIT_SYMBOL}{chinese}"
-        word_label['text'] = word_text
+        if self.is_show_chinese:
+            word_text = f"{english}{self.SPLIT_SYMBOL}{chinese}"
+        self.word_label['text'] = word_text
 
-    def show_chinese():
-        global is_show_chinese
-        is_show_chinese = not is_show_chinese
-        show_current_word()
+    def show_chinese(self):
+        self.is_show_chinese = not self.is_show_chinese
+        self.show_current_word()
 
-    def on_key_press(event):
-        global LEARN_MODEL
-        if event.char == 'h':
-            show_help()
-        elif event.char == 'q':
-            window.destroy()
-        elif event.char == 'z':
-            window.state('zoomed')
-        elif event.char == 'u':
-            show_chinese()
-        elif event.char == 'p':
-            say(word_label['text'].split(SPLIT_SYMBOL)[0])
-        elif event.char == 's':
-            LEARN_MODEL = Model.SEQUENCE
-        elif event.char == 'r':
-            LEARN_MODEL = Model.RANDOM
-        elif event.keysym == 'Right' or event.keysym == 'space' or event.char == 'd':
-            next_word()
-        elif event.keysym == 'Left' or event.char == 'a':
-            next_word(-1)
-    
-    keys = [
-        'h', # 帮助
-        'q', # 退出
-        'z', # 窗口放大
-        'u', # 显示/隐藏中文
-        'p', # 播放英文
-        's', # 顺序播放（默认）
-        'r', # 随机播放
-        'a', '<Left>',              # 上一个单词
-        'd', '<space>', '<Right>'   # 下一个单词
-    ]
-    for key in keys:
-        window.bind(key, on_key_press)
+    def on_key_press(self, event):
+        self.key_event_map.get(event.char, lambda: None)()
+        self.key_event_map.get(f'<{event.keysym}>', lambda: None)()
 
-    def on_resize(event):
+    def on_resize(self, event):
         """
         在 Tkinter 中，当你调用 config 方法来改变一个组件的属性时，这可能会触发一个 <Configure> 事件。
         在你的代码中，每次你改变标签的字体大小时，都会触发一个新的 <Configure> 事件，这就导致了 on_resize 函数被不断地调用。
         """
         # 检查事件的类型
-        if event.widget == window:
+        if event.widget == self.window:
             # 计算新的字体大小
-            new_font_size = int(event.height / 10)
+            new_font_size = min(int(event.width / 12), int(event.height / 8))
             # 更新标签的字体大小
-            word_label.config(font=("Arial", new_font_size))
+            self.word_label.config(font=("Arial", new_font_size))
 
-    window.bind('<Configure>', on_resize)
+    def bind_event(self):
+        self.key_event_map = {
+            'h': self.show_help,
+            'q': self.quit,
+            'z': lambda: self.window.state('zoomed'),
+            'u': self.show_chinese,
+            'p': self.say,
+            's': lambda: setattr(self, 'learn_model', Model.SEQUENCE),
+            'r': lambda: setattr(self, 'learn_model', Model.RANDOM),
+            'd': lambda: self.next_word(),
+            '<Right>': lambda: self.next_word(),
+            '<space>': lambda: self.next_word(),
+            'a': lambda: self.next_word(-1),
+            '<Left>': lambda: self.next_word(-1),
+            '<Configure>': self.on_resize
+        }
+
+        for key, _ in self.key_event_map.items():
+            self.window.bind(key, self.on_key_press)
+        self.window.bind('<Configure>', self.on_resize)
+        
+    def run(self):
+        self.window.after(200, self.next_word)
+        # 运行窗口
+        self.window.mainloop()
+
+    def quit(self):
+        self.window.destroy()
+
+    def say(self):
+        Speech.say(self.words[self.current_word_index][0])
 
 
-    window.after(200, next_word)
-
-    # 运行窗口
-    window.mainloop()
+if __name__ == '__main__':
+    learning_english = LearingEnglish(words)
+    learning_english.run()
