@@ -16,6 +16,10 @@ class PlayMode(Enum):
     EnglishChinese = 3
     ChineseEnglish = 4
 
+class PlayStatus(Enum):
+    Start = 1
+    End = 2
+
 
 unit1 = [('textbook', 'n. 教科书；课本'), ('conversation', 'n. 交谈；谈话'), ('aloud', 'adv. 大声地；出声地'), ('pronunciation', 'n. 发音；读音'), ('sentence', 'n. 句子'), ('patient', 'adj. 有耐心的 n. 病人'), ('expression', 'n. 表达（方式）；表示'), ('discover', 'v. 发现；发觉'), ('secret', 'n. 秘密；adj. 秘密的；'), ('fall in love with', '爱上；与⋯⋯相爱'), ('grammar', 'n. 语法'), ('repeat', 'v. 重复；重做'), ('note', 'n. 笔记；记录 v. 注意；指出'), ('pal', 'n. 朋友；伙伴'), ('pattern', 'n. 模式；方式'), ('physics', 'n. 物理；物理学'), ('chemistry', 'n. 化学'), ('partner', 'n. 搭档；同伴'), ('pronounce', 'v. 发音'), ('increase', 'v. 增加；增长'), ('speed', 'n. 速度 v.加速'), ('ability', 'n. 能力；才能'), ('brain', 'n. 大脑'), ('active', 'adj. 活跃的；积极的'), ('attention', 'n. 注意；关注'), ('pay attention to', '注意；关注'), ('connect', 'v. （使）连接；与⋯⋯有联系'), ('connect … with', '把⋯⋯和⋯⋯连接或联系起来'), ('overnight', 'adv. 一夜之间；在夜间'), ('review', 'v. & n. 回顾；复习'), ('knowledge', 'n.知识；学问'), ('wisely', 'adv. 明智地；聪明地'), ('Annie', '安妮（女名）'), ('Alexander Graham Bell', '格雷厄姆 • 贝尔')]
 unit2 = [('lantern', 'n. 灯笼'), ('stranger', 'n. 陌生人'), ('relative', 'n. 亲属；亲戚'), ('put on', '增加（体重）；发胖'), ('pound', 'n. 磅（重量单位）；英镑'), ('folk', 'adj. 民间的；民俗的'), ('goddess', 'n. 女神'), ('steal', 'v. (stole ; stolen) 偷；窃取'), ('lay', 'v. (laid; laid) 放置；安放；产（卵）；下（蛋）'), ('lay out', '摆开；布置'), ('dessert', 'n. （饭后）甜点；甜食'), ('garden', 'n. 花园；园子'), ('admire', 'v. 欣赏；仰慕'), ('tie', 'n. 领带 v. 捆；束'), ('haunted', 'a. 有鬼魂出没的；闹鬼的'), ('ghost', 'n. 鬼；鬼魂'), ('trick', 'n. 花招；把戏'), ('treat', 'n. 款待；招待v. 招待；请客'), ('spider', 'n. 蜘蛛'), ('Christmas', 'n. 圣诞节'), ('fool', 'n. 蠢人；傻瓜 v. 愚弄adj. 愚蠢的'), ('lie', 'v. (lay ;lain) 平躺；处于'), ('novel', 'n. （长篇）小说'), ('eve', 'n. （尤指宗教节假日的）前夕；前夜'), ('bookstore', 'n. 书店'), ('dead', 'adj. 死的；失去生命的'), ('business', 'n. 生意；商业'), ('punish', 'v. 处罚；惩罚'), ('warn', 'v. 警告；告诫'), ('present', 'n. 现在；礼物adj. 现在的'), ('nobody', 'pron. 没有人'), ('warmth', 'n. 温暖；暖和'), ('spread', 'v. 传播；展开 n. 蔓延；传播'), ('Macao', '澳门'), ('Chiang Mai', '清迈（泰城市）'), ('Halloween', '万圣节前夕'), ('St. Valentine’s Day', '情人节'), ('Clara', '克拉拉（女名）'), ('Santa Claus', '圣诞老人'), ('Charles Dickens', '查尔斯 • 狄更斯（英）'), ('Scrooge', '斯克鲁奇 n.（非正式）吝啬鬼'), ('Jacob Marley', '雅各布 • 马利')]
@@ -49,13 +53,25 @@ class LearingEnglish():
     SPLIT_SYMBOL = '\n\n'
 
     def __init__(self, words, title='学习英语'):
-        self.play_mode = PlayMode.Auto
+        self.play_mode = PlayMode.Manual
+        self.play_status = PlayStatus.Start
         self.learning_mode = LearningMode.Sequence
         self.words = words
         self.current_word_index = -1
         self.is_show_chinese = True
         self.window = self.create_window(title)
         self.bind_event()
+        
+        self.after_id = None
+
+    def set_words(self, words):
+        self.words = words
+        self.current_word_index = 0
+        self.show_current_word()
+
+    def set_play_mode(self, play_mode):
+        self.play_mode = play_mode
+        self.show_current_word()
 
     def create_window(self, title):
         window = tk.Tk()
@@ -84,6 +100,9 @@ class LearingEnglish():
 
         help_text = """
         快捷键：
+        - 切换单词库：Unit1-6
+        - 切换播放模式：F1 手动，F2 自动，F3 英文中文，F4 中文英文
+        - 全屏：z
         - 显示/隐藏中文：u
         - 上一个单词：左箭头，a，空格
         - 下一个单词：右箭头，d
@@ -97,27 +116,37 @@ class LearingEnglish():
         help_label.pack()
 
     def next_word(self, step=1):
-        if self.learning_mode == LearningMode.Sequence:
-            self.current_word_index += step
-        elif self.learning_mode == LearningMode.Random:
-            self.current_word_index = random.randint(0, len(self.words) - 1)
+        # 确保每次只有一个任务在执行，这可以防止任务堆积。
+        if self.after_id:
+            self.window.after_cancel(self.after_id)
+            self.after_id = None
 
-        if self.current_word_index >= len(self.words):
-            self.current_word_index = 0
-        elif self.current_word_index < 0:
-            self.current_word_index = len(self.words) - 1
+        if ((self.play_mode == PlayMode.EnglishChinese or 
+            self.play_mode == PlayMode.ChineseEnglish) and 
+            self.play_status == PlayStatus.End):
+            pass
+        else:
+            if self.learning_mode == LearningMode.Sequence:
+                self.current_word_index += step
+            elif self.learning_mode == LearningMode.Random:
+                self.current_word_index = random.randint(0, len(self.words) - 1)
+
+            if self.current_word_index >= len(self.words):
+                self.current_word_index = 0
+            elif self.current_word_index < 0:
+                self.current_word_index = len(self.words) - 1
 
         self.show_current_word()
 
     def show_current_word(self):
+        english, chinese = self.words[self.current_word_index]
+
         if self.play_mode == PlayMode.Manual:
-            english, chinese = self.words[self.current_word_index]
             word_text = english
             if self.is_show_chinese:
                 word_text = f"{english}{self.SPLIT_SYMBOL}{chinese}"
             self.word_label['text'] = word_text
         elif self.play_mode == PlayMode.Auto:
-            english, chinese = self.words[self.current_word_index]
             word_text = f"{english}{self.SPLIT_SYMBOL}{chinese}"
             self.word_label['text'] = word_text
 
@@ -131,7 +160,25 @@ class LearingEnglish():
             这样，lambda 函数就会先调用 self.say()，然后生成一个空格键事件，最后返回 self.window.event_generate('<space>') 的返回值。
             请注意，这种方法只适用于你不关心 self.say() 的返回值的情况。如果你需要 self.say() 的返回值，你应该使用一个正常的函数，而不是 lambda 函数。
             """
-            self.window.after(10, lambda: (self.say(), self.window.event_generate('<space>'))[1])
+            self.after_id = self.window.after(500, lambda: (self.say(), self.window.event_generate('<space>'))[1])
+        elif self.play_mode == PlayMode.EnglishChinese:
+            if self.play_status == PlayStatus.Start:
+                word_text = english
+                self.word_label['text'] = word_text
+                self.play_status = PlayStatus.End
+            elif self.play_status == PlayStatus.End:
+                word_text = chinese
+                self.word_label['text'] = word_text
+                self.play_status = PlayStatus.Start
+        elif self.play_mode == PlayMode.ChineseEnglish:
+            if self.play_status == PlayStatus.Start:
+                word_text = chinese
+                self.word_label['text'] = word_text
+                self.play_status = PlayStatus.End
+            elif self.play_status == PlayStatus.End:
+                word_text = english
+                self.word_label['text'] = word_text
+                self.play_status = PlayStatus.Start
         
         self.window.update()
 
@@ -140,8 +187,11 @@ class LearingEnglish():
         self.show_current_word()
 
     def on_key_press(self, event):
-        self.key_event_map.get(event.char, lambda: None)()
-        self.key_event_map.get(f'<{event.keysym}>', lambda: None)()
+        try:
+            self.key_event_map.get(event.char, lambda: None)()
+            self.key_event_map.get(f'<{event.keysym}>', lambda: None)()
+        finally:
+            pass
 
     def on_resize(self, event):
         """
@@ -169,13 +219,22 @@ class LearingEnglish():
             '<space>': lambda: self.next_word(),
             'a': lambda: self.next_word(-1),
             '<Left>': lambda: self.next_word(-1),
-            '<Configure>': self.on_resize
+            '1': lambda: self.set_words(unit1),
+            '2': lambda: self.set_words(unit2),
+            '3': lambda: self.set_words(unit3),
+            '4': lambda: self.set_words(unit4),
+            '5': lambda: self.set_words(unit5),
+            '6': lambda: self.set_words(unit6),
+            '<F1>': lambda: self.set_play_mode(PlayMode.Manual),
+            '<F2>': lambda: self.set_play_mode(PlayMode.Auto),
+            '<F3>': lambda: self.set_play_mode(PlayMode.EnglishChinese),
+            '<F4>': lambda: self.set_play_mode(PlayMode.ChineseEnglish),
         }
 
         for key, _ in self.key_event_map.items():
             self.window.bind(key, self.on_key_press)
         self.window.bind('<Configure>', self.on_resize)
-        
+
     def run(self):
         self.window.after(200, self.next_word)
         # 运行窗口
