@@ -15,34 +15,23 @@ class PlayMode(Enum):
     Auto = 2
     EnglishChinese = 3
     ChineseEnglish = 4
+    ChinesePlay = 5
 
 class PlayStatus(Enum):
     Start = 1
     End = 2
 
 
-def read_english_book(filename):
-    with open(filename, 'r') as file:
-        return eval(file.read())
-
-Units = read_english_book('english/results/9.txt')
-
-def all_words():
-    all_words = []
-    for _, word_list in Units.items():
-        all_words.extend(word_list)
-    return all_words
-
-
 class Speech():
+    # Daniel Zoe Ava
     @staticmethod
-    def say(text, voice=None):
+    def say(text, voice='Ava'):
         voice_param = f'-v {voice}' if voice else ''
-        say_command = f'say {voice_param} {text}'
+        say_command = f'say {voice_param} "{text}"'
         os.system(say_command)
 
     @staticmethod
-    def say_zh(text, voice='Tingting'):
+    def say_chinese(text, voice='Tingting'):
         Speech.say(text, voice=voice)
 
     @staticmethod
@@ -55,17 +44,28 @@ class Speech():
 class LearingEnglish():
     SPLIT_SYMBOL = '\n\n'
 
-    def __init__(self, words, title='学习英语 - 快速背单词'):
+    def __init__(self, title='学习英语 - 快速背单词'):
         self.play_mode = PlayMode.Manual
         self.play_status = PlayStatus.Start
         self.learning_mode = LearningMode.Sequence
-        self.words = words
+        self.words = None
         self.current_word_index = -1
         self.is_show_chinese = True
         self.window = self.create_window(title)
+        self.create_menu()
         self.bind_event()
-        
         self.after_id = None
+
+
+    def read_english_book(self, filename):
+        with open(filename, 'r') as file:
+            return eval(file.read())
+
+    def all_words(self, units):
+        all_words = []
+        for _, word_list in units.items():
+            all_words.extend(word_list)
+        return all_words
 
     def set_words(self, words):
         self.words = words
@@ -76,6 +76,36 @@ class LearingEnglish():
         self.play_mode = play_mode
         self.show_current_word()
 
+    def get_current_word(self):
+        return self.words[self.current_word_index]
+    
+    def set_text_widget(self, text):
+        self.text_widget.config(state=tk.NORMAL)    # 设置为可编辑
+        self.text_widget.delete('1.0', tk.END)
+        self.text_widget.insert(tk.END, text)
+        self.text_widget.tag_configure("center", justify='center')  # 创建一个名为 "center" 的标签，设置其 justify 选项为 'center'
+        self.text_widget.tag_add("center", '1.0', tk.END)           # 将 "center" 标签应用到所有的文本
+        self.text_widget.config(state=tk.DISABLED)  # 设置为不可编辑
+
+    def create_menu(self):
+        menubar = tk.Menu(self.window)
+        filemenu = tk.Menu(menubar, tearoff=0)
+        self.wordbook_var = tk.StringVar()  # 创建一个 StringVar，用于存储当前选择的单词本
+        for filename in os.listdir('wordbook'):
+            filemenu.add_radiobutton(label=filename, variable=self.wordbook_var, 
+                                     command=lambda: self.load_words(f'wordbook/{self.wordbook_var.get()}'))
+        menubar.add_cascade(label="单词本", menu=filemenu)
+        self.window.config(menu=menubar)
+        
+        # 模拟点击第一个菜单项，加载第一个单词本
+        filemenu.invoke(0)
+
+    def load_words(self, filename):
+        self.Units = self.read_english_book(filename)
+        self.words = self.all_words(self.Units)
+        self.current_word_index = 0
+        self.show_current_word()
+
     def create_window(self, title):
         window = tk.Tk()
         window.title(title)
@@ -84,12 +114,15 @@ class LearingEnglish():
         window.geometry("1200x800")
         # window.state('zoomed')
 
-        # 创建一个标签，用于显示单词
-        self.word_label = tk.Label(window, text="")
+        # 创建一个 Text，用于显示单词，禁用编辑功能。
+        self.text_widget = tk.Text(window, 
+                                   wrap=tk.WORD, 
+                                   state=tk.DISABLED,
+                                   font=("Arial", 72))
 
         # 控件布局
         # 将 english_label 放置在第 0 行
-        self.word_label.grid(row=0, sticky='nsew')
+        self.text_widget.grid(row=0, sticky='nsew', pady=100)
         # 设置第 0 行权重为 1，这样它会分配整个窗口的空间
         window.grid_rowconfigure(0, weight=1)
         # 设置第 0 列的权重为 1，这样 label 会占满窗口的宽度
@@ -107,7 +140,7 @@ class LearingEnglish():
           0 所有单词
           1 - 9 Unit1 - Unit9
           Ctrl/Control + [0-4] Unit10 - Unit14
-        - 切换播放模式：F1 手动（默认），F2 自动，F3 英文-中文，F4 中文-英文
+        - 切换播放模式：F1 手动（默认），F2 自动，F3 英文-中文，F4 中文-英文，F5 中文播放（听写模式）
         - 切换学习模式：s 顺序（默认），r 随机
         - 全屏：z
         - 显示/隐藏中文：u
@@ -144,16 +177,16 @@ class LearingEnglish():
         self.show_current_word()
 
     def show_current_word(self):
-        english, chinese = self.words[self.current_word_index]
+        english, chinese = self.get_current_word()
 
         if self.play_mode == PlayMode.Manual:
             word_text = english
             if self.is_show_chinese:
                 word_text = f"{english}{self.SPLIT_SYMBOL}{chinese}"
-            self.word_label['text'] = word_text
+            self.set_text_widget(word_text)
         elif self.play_mode == PlayMode.Auto:
             word_text = f"{english}{self.SPLIT_SYMBOL}{chinese}"
-            self.word_label['text'] = word_text
+            self.set_text_widget(word_text)
 
             """
             在 Python 中，lambda 函数只能包含一个表达式，不能包含多条语句。但是，你可以通过将多个操作组合成一个表达式来绕过这个限制。
@@ -168,22 +201,22 @@ class LearingEnglish():
             self.after_id = self.window.after(500, lambda: (self.say(), self.window.event_generate('<space>'))[1])
         elif self.play_mode == PlayMode.EnglishChinese:
             if self.play_status == PlayStatus.Start:
-                word_text = english
-                self.word_label['text'] = word_text
+                self.set_text_widget(english)
                 self.play_status = PlayStatus.End
             elif self.play_status == PlayStatus.End:
-                word_text = chinese
-                self.word_label['text'] = word_text
+                self.set_text_widget(chinese)
                 self.play_status = PlayStatus.Start
         elif self.play_mode == PlayMode.ChineseEnglish:
             if self.play_status == PlayStatus.Start:
-                word_text = chinese
-                self.word_label['text'] = word_text
+                self.set_text_widget(chinese)
                 self.play_status = PlayStatus.End
             elif self.play_status == PlayStatus.End:
-                word_text = english
-                self.word_label['text'] = word_text
+                self.set_text_widget(english)
                 self.play_status = PlayStatus.Start
+        elif self.play_mode == PlayMode.ChinesePlay:
+            self.set_text_widget(chinese)
+            # 等待播放两次中文后结束
+            self.after_id = self.window.after(500, lambda: (self.say_chinese(), self.say_chinese(), self.window.event_generate('<space>'))[2])
         
         self.window.update()
 
@@ -205,10 +238,19 @@ class LearingEnglish():
         """
         # 检查事件的类型
         if event.widget == self.window:
-            # 计算新的字体大小
-            new_font_size = min(int(event.width / 12), int(event.height / 8))
-            # 更新标签的字体大小
-            self.word_label.config(font=("Arial", new_font_size))
+            # # 计算新的字体大小
+            # new_font_size = min(int(event.width / 12), int(event.height / 8))
+            # # 更新标签的字体大小
+            # self.word_label.config(font=("Arial", new_font_size))
+
+            # # 获取需要显示的文本
+            # english, chinese = self.get_current_word()
+            # # 计算新的字体大小
+            # new_font_size = int(event.width*2 / max(len(english), len(chinese)))
+            # # 更新标签的字体大小
+            # self.text_widget.config(font=("Arial", new_font_size))
+
+            pass
 
     def bind_event(self):
         self.key_event_map = {
@@ -228,6 +270,7 @@ class LearingEnglish():
             '<F2>': lambda: self.set_play_mode(PlayMode.Auto),
             '<F3>': lambda: self.set_play_mode(PlayMode.EnglishChinese),
             '<F4>': lambda: self.set_play_mode(PlayMode.ChineseEnglish),
+            '<F5>': lambda: self.set_play_mode(PlayMode.ChinesePlay),
         }
 
         for key, _ in self.key_event_map.items():
@@ -249,11 +292,11 @@ class LearingEnglish():
             tens_digit = '1' if event.state == 4 else '' # Control 的按键为 4
             digit = f'{tens_digit}{single_digit}'
 
-            unit = Units.get(digit)
+            unit = self.Units.get(digit)
             if unit:
                 self.set_words(unit)
             elif digit == '0':
-                self.set_words(all_words())
+                self.set_words(self.all_words())
 
 
     def run(self):
@@ -267,7 +310,9 @@ class LearingEnglish():
     def say(self):
         Speech.say(self.words[self.current_word_index][0])
 
+    def say_chinese(self):
+        Speech.say_chinese(self.words[self.current_word_index][1])
 
 if __name__ == '__main__':
-    learning_english = LearingEnglish(all_words())
+    learning_english = LearingEnglish()
     learning_english.run()

@@ -1,0 +1,7 @@
+{
+    '7' : [
+        ('I\'m worried about your safety.', '我担心您的安全。'), 
+        ('Sixteen-year-olds should be allowed to get their ears pierced.', '应该允许十六岁的青少年打耳洞。'),
+        ('Do you think we may be allowed to take photos if we don\'t use a flash?', '你觉得如果我们不用闪光灯，可能会允许我们拍照吗？'),
+    ],
+}
