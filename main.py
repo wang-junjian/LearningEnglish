@@ -1,9 +1,11 @@
 import os
+import threading
 import time
 import random
 import tkinter as tk
 
 from enum import Enum
+from multiprocessing import Process, Lock
 
 
 class LearningMode(Enum):
@@ -22,29 +24,37 @@ class PlayStatus(Enum):
     End = 2
 
 
-class Speech():
+class Speaker():
+    def __init__(self):
+        self.lock = Lock()
+        self.process = None
+
+    def run(self, text, voice):
+        with self.lock:
+            voice_param = f'-v {voice}' if voice else ''
+            say_command = f'say {voice_param} "{text}"'
+            os.system(say_command)
+
+    def stop(self):
+        if self.process and self.process.is_alive():
+            self.process.terminate()
+
     # Daniel Zoe Ava
-    @staticmethod
-    def say(text, voice='Ava'):
-        voice_param = f'-v {voice}' if voice else ''
-        say_command = f'say {voice_param} "{text}"'
-        os.system(say_command)
+    def say(self, text, voice='Ava'):
+        self.process = Process(target=self.run, args=(text, voice))
+        self.process.start()
+        self.process.join()
 
     @staticmethod
-    def say_chinese(text, voice='Tingting'):
-        Speech.say(text, voice=voice)
-
-    @staticmethod
-    def say_n_times(text, voice=None, n=1, interval=0.5):
-        for i in range(n):
-            Speech.say(text)
-            time.sleep(interval)
+    def say_chinese(self, text, voice='Tingting'):
+        self.say(text, voice=voice)
 
 
 class LearingEnglish():
     SPLIT_SYMBOL = '\n\n'
 
     def __init__(self, title='学习英语 - 快速背单词'):
+        self.speaker = Speaker()
         self.play_mode = PlayMode.Manual
         self.play_status = PlayStatus.Start
         self.learning_mode = LearningMode.Sequence
@@ -98,12 +108,12 @@ class LearingEnglish():
         self.window.config(menu=menubar)
         
         # 模拟点击第一个菜单项，加载第一个单词本
-        filemenu.invoke(0)
+        filemenu.invoke(1)
 
     def load_words(self, filename):
         self.Units = self.read_english_book(filename)
         self.words = self.all_words(self.Units)
-        self.current_word_index = 0
+        self.current_word_index = -1
         self.show_current_word()
 
     def create_window(self, title):
@@ -153,6 +163,9 @@ class LearingEnglish():
         help_label = tk.Label(help_window, text=help_text, anchor='w', justify='left')
         help_label.pack()
 
+    def show_config(self, event):
+        pass
+
     def next_word(self, step=1):
         # 确保每次只有一个任务在执行，这可以防止任务堆积。
         if self.after_id:
@@ -187,7 +200,6 @@ class LearingEnglish():
         elif self.play_mode == PlayMode.Auto:
             word_text = f"{english}{self.SPLIT_SYMBOL}{chinese}"
             self.set_text_widget(word_text)
-
             """
             在 Python 中，lambda 函数只能包含一个表达式，不能包含多条语句。但是，你可以通过将多个操作组合成一个表达式来绕过这个限制。
             以下是如何在 lambda 函数中同时调用 say 方法和生成一个空格键事件的代码：
@@ -276,7 +288,7 @@ class LearingEnglish():
         for key, _ in self.key_event_map.items():
             self.window.bind(key, self.on_key_press)
         self.window.bind('<Configure>', self.on_resize)
-
+        self.window.bind('<Command-comma>', self.show_config)
         self.window.bind('<Key>', self.on_set_word)
 
     def on_set_word(self, event):
@@ -308,10 +320,10 @@ class LearingEnglish():
         self.window.destroy()
 
     def say(self):
-        Speech.say(self.words[self.current_word_index][0])
+        self.speaker.say(self.words[self.current_word_index][0])
 
     def say_chinese(self):
-        Speech.say_chinese(self.words[self.current_word_index][1])
+        self.speaker.say_chinese(self.words[self.current_word_index][1])
 
 if __name__ == '__main__':
     learning_english = LearingEnglish()
