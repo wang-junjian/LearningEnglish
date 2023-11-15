@@ -1,12 +1,14 @@
 import os
-import threading
-import time
+import re
 import random
 import tkinter as tk
 
 from enum import Enum
 from multiprocessing import Process, Lock
 
+
+def remove_chars(text):
+    return re.sub(r'^.*\. ', '', text)
 
 class LearningMode(Enum):
     Sequence = 1
@@ -45,7 +47,6 @@ class Speaker():
         self.process.start()
         self.process.join()
 
-    @staticmethod
     def say_chinese(self, text, voice='Tingting'):
         self.say(text, voice=voice)
 
@@ -108,7 +109,7 @@ class LearingEnglish():
         self.window.config(menu=menubar)
         
         # 模拟点击第一个菜单项，加载第一个单词本
-        filemenu.invoke(1)
+        filemenu.invoke(0)
 
     def load_words(self, filename):
         self.Units = self.read_english_book(filename)
@@ -227,8 +228,8 @@ class LearingEnglish():
                 self.play_status = PlayStatus.Start
         elif self.play_mode == PlayMode.ChinesePlay:
             self.set_text_widget(chinese)
-            # 等待播放两次中文后结束
-            self.after_id = self.window.after(500, lambda: (self.say_chinese(), self.say_chinese(), self.window.event_generate('<space>'))[2])
+            # 等待播放两次英文、两次中文后结束
+            self.after_id = self.window.after(500, lambda: (self.say(2), self.say_chinese(2), self.window.event_generate('<space>'))[2])
         
         self.window.update()
 
@@ -319,11 +320,14 @@ class LearingEnglish():
     def quit(self):
         self.window.destroy()
 
-    def say(self):
-        self.speaker.say(self.words[self.current_word_index][0])
+    def say(self, n=1):
+        for _ in range(n):
+            self.speaker.say(self.words[self.current_word_index][0])
 
-    def say_chinese(self):
-        self.speaker.say_chinese(self.words[self.current_word_index][1])
+    def say_chinese(self, n=1):
+        for _ in range(n):
+            chinese = self.words[self.current_word_index][1]
+            self.speaker.say_chinese(remove_chars(chinese))
 
 if __name__ == '__main__':
     learning_english = LearingEnglish()
