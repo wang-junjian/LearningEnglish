@@ -1,6 +1,7 @@
 import os
 import re
 import random
+import platform
 import tkinter as tk
 
 from enum import Enum
@@ -43,11 +44,14 @@ class Speaker():
 
     # Daniel Zoe Ava
     def say(self, text, voice='Ava'):
-        self.process = Process(target=self.run, args=(text, voice))
-        self.process.start()
-        self.process.join()
+        if platform.system() == 'Darwin':
+            self.process = Process(target=self.run, args=(text, voice))
+            self.process.start()
+            self.process.join()
 
     def say_chinese(self, text, voice='Tingting'):
+        if voice == 'Tingting' and platform.mac_ver()[0] < '13':
+            voice = 'Ting-ting'
         self.say(text, voice=voice)
 
 
